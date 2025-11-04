@@ -2,13 +2,12 @@ name: Build and deploy ASP.Net Core app to Azure Web App - KVRPortfolio
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     permissions:
       contents: read
 
@@ -16,13 +15,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up .NET Core
+      - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          # Use the .NET version your app targets. 7.0.x is LTS; change to 8.x/9.x if needed.
-          dotnet-version: '7.0.x'
+          dotnet-version: '7.0.x'   # change if your project targets a different SDK
 
-      - name: Restore dependencies
+      - name: Restore
         run: dotnet restore
 
       - name: Build
@@ -31,35 +29,33 @@ jobs:
       - name: Publish
         run: dotnet publish --configuration Release --no-build -o ./publish
 
-      - name: Upload artifact for deployment job
+      - name: Upload artifact for deploy
         uses: actions/upload-artifact@v4
         with:
-          name: dotnet-app
+          name: dotnet-publish
           path: ./publish
 
   deploy:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     needs: build
     permissions:
       id-token: write
       contents: read
 
     steps:
-      - name: Download artifact from build job
+      - name: Download published artifact
         uses: actions/download-artifact@v4
         with:
-          name: dotnet-app
+          name: dotnet-publish
+          path: ./publish
 
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          # Use a single JSON service principal secret stored as AZURE_CREDENTIALS
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
       - name: Deploy to Azure Web App
-        id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'KVRPortfolio'        # Your App Service name
-          slot-name: 'Production'         # optional; remove or change if not using slots
-          package: './publish'            # path to published output
+          app-name: 'KVRPortfolio'      # EXACT app service name
+          package: './publish'         # published artifact
