@@ -1,77 +1,59 @@
---- FILE: README.md ---
-# Vinod Reddy Kanmanthareddy - Personal Portfolio (ASP.NET Core MVC)
+# Portfolio ASP.NET Core MVC (Vinod Reddy Kanmanthareddy)
 
-This repository contains a professional personal portfolio website built with **ASP.NET Core MVC** (.NET 7) pre-populated from Vinod Reddy Kanmanthareddy's resume.
+This repository contains a minimal, professional ASP.NET Core MVC portfolio website tailored to Vinod Reddy Kanmanthareddy's resume. It uses .NET 7 minimal hosting, Razor views, responsive layout (Tailwind-like utility classes replaced by custom CSS), and is ready to push to GitHub.
 
-Features
-- Clean, professional layout using Bootstrap CDN
-- Home / About / Projects / Experience / Contact sections
-- Resume data pre-filled from uploaded CV
-- Responsive design
-- GitHub Actions workflow to build on push
+---
 
-How to run locally
-1. Install .NET 7 SDK: https://dotnet.microsoft.com/download
-2. Clone the repo:
-```bash
-git clone https://github.com/<your-username>/vinod-portfolio-aspnet.git
-cd vinod-portfolio-aspnet
+## Project structure
 ```
-3. Run the app:
-```bash
-dotnet run --project Portfolio.Web
-# open https://localhost:5001
-```
-
-Publish to GitHub (push code)
-```bash
-git init
-git add .
-git commit -m "Initial: ASP.NET Core portfolio"
-# create GitHub repo then
-git remote add origin https://github.com/<your-username>/vinod-portfolio-aspnet.git
-git branch -M main
-git push -u origin main
+VinodPortfolio/
+├── VinodPortfolio.sln
+├── VinodPortfolio/
+│   ├── VinodPortfolio.csproj
+│   ├── Program.cs
+│   ├── Controllers/
+│   │   └── HomeController.cs
+│   ├── Models/
+│   │   └── ResumeModel.cs
+│   ├── Views/
+│   │   ├── Shared/_Layout.cshtml
+│   │   ├── Home/Index.cshtml
+│   │   ├── Home/About.cshtml
+│   │   └── Shared/_ContactPartial.cshtml
+│   ├── wwwroot/
+│   │   ├── css/site.css
+│   │   └── images/ (drop your photos/cert images here)
+│   └── appsettings.json
+└── README.md
 ```
 
-Optional: Deploy to Azure App Service (brief steps)
-1. Create App Service on Azure portal (Windows, .NET 7)
-2. In Azure, set up Deployment Center to pull from GitHub repo and deploy on push.
-3. Or use `az webapp deploy` from Azure CLI.
+---
 
---- FILE: .gitignore ---
-bin/
-obj/
-.vs/
-*.user
-*.suo
-*.db
-appsettings.Secret.json
+## VinodPortfolio.csproj
 
---- FILE: Portfolio.Web/Portfolio.Web.csproj ---
+```xml
 <Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="7.0.0" />
-  </ItemGroup>
 </Project>
+```
 
---- FILE: Portfolio.Web/Program.cs ---
+---
+
+## Program.cs
+
+```csharp
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Portfolio.Web.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllersWithViews().AddRazorRuntimeCompilation();
-
-// Register resume data as singleton so controllers/views can use it
-builder.Services.AddSingleton(Resume.Sample());
+// Add services
+builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
@@ -81,7 +63,6 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
@@ -90,415 +71,296 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
+```
 
---- FILE: Portfolio.Web/Models/Resume.cs ---
-using System.Collections.Generic;
+---
 
-namespace Portfolio.Web.Models
-{
-    public record Experience(string Title, string Company, string Location, string Period, string Details);
-    public record Education(string Degree, string Institution, string Year);
-    public record Project(string Title, string Summary, string TechStack, string Link);
+## Controllers/HomeController.cs
 
-    public class Resume
-n    {
-        public string FullName { get; init; }
-        public string Title { get; init; }
-        public string Email { get; init; }
-        public string Phone { get; init; }
-        public string LinkedIn { get; init; }
-        public string Summary { get; init; }
-        public List<string> Skills { get; init; }
-        public List<Experience> Experiences { get; init; }
-        public List<Education> Educations { get; init; }
-        public List<Project> Projects { get; init; }
-
-        public static Resume Sample() => new Resume
-        {
-            FullName = "Vinod Reddy Kanmanthareddy",
-            Title = "Technical Project Manager | Software Architect | Engineering Manager",
-            Email = "vinod.kanmantha@gmail.com",
-            Phone = "+91-9640598454",
-            LinkedIn = "https://linkedin.com/in/vinod-reddy-kanmanthareddy",
-            Summary = "Results-driven technology leader with 18+ years of experience in cloud-native enterprise architecture, AI-driven analytics, and DevOps modernization.",
-            Skills = new List<string>{ "Azure (AKS, Functions, Logic Apps)", "Docker, Kubernetes, Terraform, Helm", ".NET 6/7, ASP.NET Core", "Python, AI/ML, Azure ML", "React, Angular, TypeScript", "CI/CD (Azure DevOps, GitHub Actions, Jenkins)" },
-            Experiences = new List<Experience>
-            {
-                new Experience("Technical Project Lead - VGSPL (Client: Amerant Inc.)","VGSPL","Hyderabad, India","Jun 2022 - Present","Led design and delivery of a cloud-native citizen benefits platform using Azure Kubernetes Service (AKS), Dockerized .NET 6 microservices, and Python-based AI analytics. Built CI/CD automation and observability."),
-                new Experience("Technical Project Lead - KSAP Inc (Client: 3GTMS Inc.)","KSAP Inc","Khammam, India","Mar 2021 - Jun 2022","Modernized transportation management platform using Python (FastAPI) and Angular 17. Integrated AI forecasting and CI/CD automation."),
-                new Experience("Technical Lead - 6D PropTech (Financial Markets)","6D PropTech","Hyderabad, India","Jun 2019 - Feb 2021","Architected microservices-based financial analytics platform integrating Bloomberg APIs and AI-driven reconciliation.")
-            },
-            Educations = new List<Education>
-            {
-                new Education("M.S., Computer Science","University of Northern Virginia, USA","Year: —"),
-                new Education("B.Tech, Computer Science","Madras University, Chennai, India","2003")
-            },
-            Projects = new List<Project>
-            {
-                new Project("Cloud-native Citizen Benefits Platform","Microservices, AKS, .NET 6, Python, Prometheus & Grafana","Azure, AKS, .NET 6, Python, React",""),
-                new Project("Transportation Management Modernization","FastAPI backend, Angular frontend, CI/CD automation","Python, Angular","")
-            }
-        };
-    }
-}
-
---- FILE: Portfolio.Web/Controllers/HomeController.cs ---
+```csharp
 using Microsoft.AspNetCore.Mvc;
-using Portfolio.Web.Models;
+using VinodPortfolio.Models;
 
-namespace Portfolio.Web.Controllers
+namespace VinodPortfolio.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly Resume _resume;
-        public HomeController(Resume resume)
+        public IActionResult Index()
         {
-            _resume = resume;
+            var model = ResumeModel.Sample();
+            return View(model);
         }
 
-        public IActionResult Index() => View(_resume);
-        public IActionResult About() => View(_resume);
-        public IActionResult Projects() => View(_resume);
-        public IActionResult Contact() => View(_resume);
+        public IActionResult About()
+        {
+            var model = ResumeModel.Sample();
+            return View(model);
+        }
     }
 }
+```
 
---- FILE: Portfolio.Web/Views/Shared/_Layout.cshtml ---
-@using Portfolio.Web.Models
-@inject Resume Resume
-<!doctype html>
+---
+
+## Models/ResumeModel.cs
+
+```csharp
+namespace VinodPortfolio.Models
+{
+    public class ResumeModel
+    {
+        public string FullName { get; set; } = "Vinod Reddy Kanmanthareddy";
+        public string Title { get; set; } = "Technical Project Manager | Software Architect | Engineering Manager";
+        public string Email { get; set; } = "vinod.kanmantha@gmail.com";
+        public string Phone { get; set; } = "+91-9640598454";
+        public string LinkedIn { get; set; } = "https://linkedin.com/in/vinod-reddy-kanmanthareddy";
+
+        public string Summary { get; set; }
+        public List<string> KeySkills { get; set; } = new();
+        public List<Experience> Experiences { get; set; } = new();
+
+        public static ResumeModel Sample()
+        {
+            return new ResumeModel
+            {
+                Summary = "Results-driven technology leader with 18+ years of experience in cloud-native enterprise architecture, AI-driven analytics, and DevOps modernization.",
+                KeySkills = new List<string> { "Azure", "Kubernetes", "Docker", "Terraform", ".NET", "ASP.NET Core", "React", "CI/CD", "Python", "MLOps" },
+                Experiences = new List<Experience>
+                {
+                    new Experience { Role = "Technical Project Lead - VGSPL (Client: Amerant Inc.)", Period = "Jun 2022 – Present", Details = "Led design and delivery of a cloud-native citizen benefits platform using AKS, Dockerized .NET 6 microservices, built CI/CD automation, and introduced observability." },
+                    new Experience { Role = "Technical Project Lead - KSAP Inc", Period = "Mar 2021 – Jun 2022", Details = "Modernized transportation platform using FastAPI and Angular 17, added AI forecasting and CI/CD automation." },
+                    new Experience { Role = "Technical Lead - 6D PropTech (Financial Markets)", Period = "Jun 2019 – Feb 2021", Details = "Architected microservices-based financial analytics platform integrating Bloomberg APIs and AI-driven reconciliation." }
+                }
+            };
+        }
+    }
+
+    public class Experience
+    {
+        public string Role { get; set; } = string.Empty;
+        public string Period { get; set; } = string.Empty;
+        public string Details { get; set; } = string.Empty;
+    }
+}
+```
+
+---
+
+## Views/Shared/_Layout.cshtml
+
+```html
+<!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>@Resume.FullName - @Resume.Title</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="~/css/site.css" />
-  </head>
-  <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-      <div class="container">
-        <a class="navbar-brand" href="/">@Resume.FullName</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navMain">
-          <ul class="navbar-nav ms-auto">
-            <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
-            <li class="nav-item"><a class="nav-link" href="/Home/About">About</a></li>
-            <li class="nav-item"><a class="nav-link" href="/Home/Projects">Projects</a></li>
-            <li class="nav-item"><a class="nav-link" href="/Home/Contact">Contact</a></li>
-          </ul>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Vinod Reddy</title>
+    <link rel="stylesheet" href="/css/site.css" />
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <h1 class="brand"><a href="/">@Model?.FullName ?? "Vinod Reddy"</a></h1>
+            <nav class="nav">
+                <a href="/">Home</a>
+                <a href="/Home/About">About</a>
+                <a href="#contact">Contact</a>
+            </nav>
         </div>
-      </div>
-    </nav>
+    </header>
 
-    <main class="container mt-4">
-      @RenderBody()
+    <main class="container">
+        @RenderBody()
     </main>
 
-    <footer class="bg-light mt-5 py-4">
-      <div class="container text-center small">
-        © @DateTime.UtcNow.Year • @Resume.FullName • <a href="@Resume.LinkedIn">LinkedIn</a>
-      </div>
-    </footer>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  </body>
-</html>
-
---- FILE: Portfolio.Web/Views/Home/Index.cshtml ---
-@model Portfolio.Web.Models.Resume
-
-<div class="row gy-4">
-  <div class="col-md-8">
-    <h1>@Model.FullName</h1>
-    <h4 class="text-muted">@Model.Title</h4>
-    <p class="mt-3">@Model.Summary</p>
-
-    <section class="mt-4">
-      <h3>Experience</h3>
-      @foreach(var e in Model.Experiences)
-      {
-        <div class="mb-3">
-          <h5>@e.Title <small class="text-muted">@e.Company — @e.Period</small></h5>
-          <p>@e.Details</p>
+    <footer class="site-footer">
+        <div class="container">
+            <p>&copy; @DateTime.Now.Year Vinod Reddy Kanmanthareddy</p>
         </div>
-      }
-    </section>
+    </footer>
+</body>
+</html>
+```
 
-    <section class="mt-4">
-      <h3>Education</h3>
-      <ul>
-        @foreach(var ed in Model.Educations)
-        {
-          <li>@ed.Degree, @ed.Institution (@ed.Year)</li>
-        }
-      </ul>
-    </section>
-  </div>
+---
 
-  <aside class="col-md-4">
-    <div class="card mb-3 p-3">
-      <h5>Contact</h5>
-      <p class="mb-0">Email: <a href="mailto:@Model.Email">@Model.Email</a></p>
-      <p>Phone: @Model.Phone</p>
-      <p>LinkedIn: <a href="@Model.LinkedIn">Profile</a></p>
+## Views/Home/Index.cshtml
+
+```html
+@model VinodPortfolio.Models.ResumeModel
+@{
+    ViewData["Title"] = "Home";
+}
+
+<section class="hero">
+    <div class="container">
+        <h2>@Model.FullName</h2>
+        <p class="title">@Model.Title</p>
+        <p class="summary">@Model.Summary</p>
+        <p class="contact-inline">Email: <a href="mailto:@Model.Email">@Model.Email</a> | Phone: @Model.Phone</p>
     </div>
+</section>
 
-    <div class="card p-3">
-      <h5>Skills</h5>
-      <ul class="list-unstyled small">
-        @foreach(var s in Model.Skills)
-        {
-          <li>• @s</li>
-        }
-      </ul>
+<section>
+    <div class="container grid">
+        <div class="card">
+            <h3>Key Skills</h3>
+            <ul>
+                @foreach(var skill in Model.KeySkills){ <li>@skill</li> }
+            </ul>
+        </div>
+
+        <div class="card">
+            <h3>Experience</h3>
+            @foreach(var e in Model.Experiences){
+                <div class="exp">
+                    <strong>@e.Role</strong>
+                    <div class="period">@e.Period</div>
+                    <p>@e.Details</p>
+                </div>
+            }
+        </div>
     </div>
-  </aside>
-</div>
+</section>
 
---- FILE: Portfolio.Web/Views/Home/About.cshtml ---
-@model Portfolio.Web.Models.Resume
+@await Html.PartialAsync("_ContactPartial", Model)
+```
+
+---
+
+## Views/Home/About.cshtml
+
+```html
+@model VinodPortfolio.Models.ResumeModel
+@{
+    ViewData["Title"] = "About";
+}
 
 <h2>About</h2>
 <p>@Model.Summary</p>
 
-<h4 class="mt-4">Tech & Tools</h4>
+<h3>Education & Certifications</h3>
 <ul>
-  @foreach(var s in Model.Skills)
-  {
-    <li>@s</li>
-  }
+    <li>Master of Science, Computer Science - University of Northern Virginia</li>
+    <li>B.Tech, Computer Science - Madras University</li>
+    <li>Certifications: Brainbench, Microsoft Learn - Azure, IIT Kanpur E&ICT Academy</li>
 </ul>
 
---- FILE: Portfolio.Web/Views/Home/Projects.cshtml ---
-@model Portfolio.Web.Models.Resume
+<h3>Tools & Technologies</h3>
+<p>.NET, ASP.NET Core, Azure, Kubernetes, Docker, Terraform, Python, React, Angular, CI/CD</p>
+```
 
-<h2>Selected Projects</h2>
-<div class="row">
-  @foreach(var p in Model.Projects)
-  {
-    <div class="col-md-6 mb-3">
-      <div class="card h-100 p-3">
-        <h5>@p.Title</h5>
-        <p class="mb-1">@p.Summary</p>
-        <small class="text-muted">Tech: @p.TechStack</small>
-        @if(!string.IsNullOrEmpty(p.Link)){
-          <div class="mt-2"><a href="@p.Link" target="_blank">View</a></div>
-        }
-      </div>
-    </div>
-  }
-</div>
+---
 
---- FILE: Portfolio.Web/Views/Home/Contact.cshtml ---
-@model Portfolio.Web.Models.Resume
+## Views/Shared/_ContactPartial.cshtml
 
-<h2>Contact</h2>
-<p>If you'd like to reach out, email <a href="mailto:@Model.Email">@Model.Email</a> or call @Model.Phone.</p>
+```html
+@model VinodPortfolio.Models.ResumeModel
+<section id="contact" class="contact">
+    <h3>Contact</h3>
+    <p>Email: <a href="mailto:@Model.Email">@Model.Email</a></p>
+    <p>Phone: @Model.Phone</p>
+    <p>LinkedIn: <a href="@Model.LinkedIn" target="_blank">Profile</a></p>
+</section>
+```
 
---- FILE: Portfolio.Web/wwwroot/css/site.css ---
-body { background: #f8f9fa; }
-h1 { font-weight:700; }
-.card { border-radius: 12px; }
+---
 
---- FILE: .github/workflows/dotnet.yml ---
-name: Build
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+## wwwroot/css/site.css
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: '7.0.x'
-      - name: Restore
-        run: dotnet restore Portfolio.Web/Portfolio.Web.csproj
-      - name: Build
-        run: dotnet build --no-restore Portfolio.Web/Portfolio.Web.csproj -c Release
-      - name: Test
-        run: echo "No tests configured"
+```css
+:root{--container-width:1100px}
+body{font-family:Inter,Segoe UI,Arial,sans-serif;margin:0;color:#222}
+.container{max-width:var(--container-width);margin:0 auto;padding:20px}
+.site-header{background:#0b3d91;color:#fff;padding:18px 0}
+.site-header .brand a{color:#fff;text-decoration:none;font-size:20px}
+.nav a{color:#fff;margin-left:18px;text-decoration:none}
+.hero{background:#f6f8fb;padding:40px 0;border-bottom:1px solid #e6e9ef}
+.hero h2{margin:0;font-size:26px}
+.hero .title{color:#333;font-weight:600}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.card{background:#fff;padding:18px;border-radius:8px;box-shadow:0 6px 18px rgba(10,10,20,.06)}
+.contact{margin-top:30px}
+.site-footer{text-align:center;padding:18px 0;background:#fafafa;color:#666;margin-top:30px}
+@media(max-width:800px){.grid{grid-template-columns:1fr}}
+```
 
---- FILE: Notes.md ---
-Next steps / customization ideas:
-- Add portfolio screenshots in wwwroot/images and reference them in Projects view.
-- Add a downloadable resume PDF (place uploaded CV in wwwroot/files).
-- Add contact form with SMTP or Azure Function-backed sending.
-- Add Google Analytics / Plausible for traffic.
-- Replace placeholder project links with GitHub/Azure links.
+---
 
+## appsettings.json
 
-
---- FILE: Portfolio.Web/Models/ContactForm.cs ---
-using System.ComponentModel.DataAnnotations;
-
-namespace Portfolio.Web.Models
+```json
 {
-    public class ContactForm
-    {
-        [Required]
-        public string Name { get; set; }
-        [Required]
-        [EmailAddress]
-        public string Email { get; set; }
-        public string Phone { get; set; }
-        [Required]
-        public string Message { get; set; }
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft": "Warning",
+      "Microsoft.Hosting.Lifetime": "Information"
     }
+  },
+  "AllowedHosts": "*"
 }
+```
 
---- FILE: Portfolio.Web/Controllers/ContactController.cs ---
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using Portfolio.Web.Models;
-using System;
-using System.IO;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
-using System.Net.Mail;
+---
 
-namespace Portfolio.Web.Controllers
-{
-    public class ContactController : Controller
-    {
-        private readonly ILogger<ContactController> _logger;
-        private readonly IConfiguration _config;
+## .gitignore
 
-        public ContactController(ILogger<ContactController> logger, IConfiguration config)
-        {
-            _logger = logger;
-            _config = config;
-        }
+```
+bin/
+obj/
+.vs/
+*.user
+*.suo
+.env
 
-        [HttpGet]
-        public IActionResult Index() => View(new ContactForm());
+# Rider
+.idea/
+```
 
-        [HttpPost]
-        public async Task<IActionResult> Index(ContactForm model)
-        {
-            if (!ModelState.IsValid) return View(model);
+---
 
-            // Try to send email via SMTP if configured, otherwise fall back to writing to a local file
-            var smtpHost = _config["Contact:Smtp:Host"];
-            if (!string.IsNullOrEmpty(smtpHost))
-            {
-                try
-                {
-                    var mail = new MailMessage();
-                    mail.From = new MailAddress(_config["Contact:FromEmail"] ?? model.Email);
-                    mail.To.Add(_config["Contact:ToEmail"] ?? _config["Contact:FromEmail"]);
-                    mail.Subject = $"Portfolio contact from {model.Name}";
-                    mail.Body = $"Name: {model.Name}
-Email: {model.Email}
-Phone: {model.Phone}
+## README.md (summary & GitHub push + Azure deploy)
 
-Message:
-{model.Message}";
+```markdown
+# Vinod Reddy - Portfolio (ASP.NET Core MVC)
 
-                    using var client = new SmtpClient(smtpHost, int.Parse(_config["Contact:Smtp:Port"] ?? "25"));
-                    client.EnableSsl = bool.Parse(_config["Contact:Smtp:EnableSsl"] ?? "false");
-                    var user = _config["Contact:Smtp:User"];
-                    var pass = _config["Contact:Smtp:Pass"];
-                    if (!string.IsNullOrEmpty(user)) client.Credentials = new System.Net.NetworkCredential(user, pass);
+This repository contains a professional portfolio web app built with ASP.NET Core MVC (net7.0).
 
-                    await client.SendMailAsync(mail);
-                    TempData["Message"] = "Thanks — your message was sent successfully.";
-                    return RedirectToAction("Index");
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Failed to send contact email via SMTP");
-                }
-            }
+## Run locally
+1. Install .NET 7 SDK
+2. `dotnet restore`
+3. `dotnet run --project VinodPortfolio/VinodPortfolio.csproj`
+4. Open https://localhost:5001 or http://localhost:5000
 
-            try
-            {
-                var dir = Path.Combine(Directory.GetCurrentDirectory(), "App_Data");
-                Directory.CreateDirectory(dir);
-                var file = Path.Combine(dir, $"contact_{DateTime.UtcNow:yyyyMMddHHmmss}.txt");
-                await System.IO.File.WriteAllTextAsync(file, $"Name: {model.Name}
-Email: {model.Email}
-Phone: {model.Phone}
-Message:
-{model.Message}");
-                TempData["Message"] = "Thanks — your message was recorded.";
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to record contact message");
-                TempData["Message"] = "Sorry, we couldn't process your message right now.";
-            }
+## Push to GitHub
+```bash
+git init
+git add .
+git commit -m "Initial portfolio site"
+# create repo on GitHub manually or using gh CLI
+git remote add origin https://github.com/<your-username>/vinod-portfolio.git
+git branch -M main
+git push -u origin main
+```
 
-            return RedirectToAction("Index");
-        }
-    }
-}
+## Deploy to Azure App Service (recommended for ASP.NET hosting)
+1. Create a resource in Azure: App Service (Windows) or Linux, choose .NET 7 runtime.
+2. In GitHub: create a repository and push code.
+3. In Azure App Service -> Deployment Center: choose GitHub Actions and authorize.
+4. Select repository and branch. Azure will create a GitHub Action workflow that builds and deploys the app on push.
 
---- FILE: Portfolio.Web/Views/Contact/Index.cshtml ---
-@model Portfolio.Web.Models.ContactForm
+Alternatively use Azure CLI to deploy or configure GitHub Actions manually.
+```
 
-@{
-    ViewData["Title"] = "Contact";
-}
+---
 
-<h2>Contact</h2>
+## Next steps and notes
+- Replace placeholder content and expand Experiences list with your full resume bullets (the resume used to seed this content is included in the uploaded file).
+- Add your profile photo and certification images into `wwwroot/images` and reference them from views.
+- If you want a single-page look with sections (Home, Experience, Projects, Blog), I can convert to a single-page layout with smooth scrolling.
+- To enable contact forms, add Email service (SendGrid or SMTP) and a simple API endpoint.
 
-@if(TempData["Message"] != null)
-{
-    <div class="alert alert-success">@TempData["Message"]</div>
-}
+---
 
-<form method="post" asp-controller="Contact" asp-action="Index" novalidate>
-  <div class="mb-3">
-    <label class="form-label">Name</label>
-    <input asp-for="Name" class="form-control" />
-    <span asp-validation-for="Name" class="text-danger"></span>
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Email</label>
-    <input asp-for="Email" class="form-control" />
-    <span asp-validation-for="Email" class="text-danger"></span>
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Phone</label>
-    <input asp-for="Phone" class="form-control" />
-  </div>
-  <div class="mb-3">
-    <label class="form-label">Message</label>
-    <textarea asp-for="Message" class="form-control" rows="5"></textarea>
-    <span asp-validation-for="Message" class="text-danger"></span>
-  </div>
-  <button type="submit" class="btn btn-primary">Send Message</button>
-</form>
-
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}
-
---- FILE: Portfolio.Web/Views/Shared/_Layout.cshtml (update snippet) ---
-@@
-          <ul class="navbar-nav ms-auto">
-            <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
-            <li class="nav-item"><a class="nav-link" href="/Home/About">About</a></li>
-            <li class="nav-item"><a class="nav-link" href="/Home/Projects">Projects</a></li>
--            <li class="nav-item"><a class="nav-link" href="/Home/Contact">Contact</a></li>
-+            <li class="nav-item"><a class="nav-link" href="/Home/Contact">Contact</a></li>
-+            <li class="nav-item"><a class="nav-link" href="/Contact">Contact Form</a></li>
-          </ul>
-@@
--        <div class="container text-center small">
--        © @DateTime.UtcNow.Year • @Resume.FullName • <a href="@Resume.LinkedIn">LinkedIn</a>
--      </div>
-+        <div class="container text-center small">
-+        © @DateTime.UtcNow.Year • @Resume.FullName • <a href="@Resume.LinkedIn">LinkedIn</a> • <a href="/files/Vinod_Reddy_Kanmanthareddy_Executive_CV_2025_Final_HQ.pdf">Download Resume</a>
-+      </div>
-@@
-
+End of project boilerplate. Update styles and text as desired. Happy to refine design, add animations, projects page, or CI/CD workflow file for Azure/GitHub Actions.
