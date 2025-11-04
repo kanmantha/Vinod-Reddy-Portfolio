@@ -18,7 +18,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '7.0.x'   # change if your project targets a different SDK
+          dotnet-version: '7.0.x'
 
       - name: Restore
         run: dotnet restore
@@ -29,15 +29,18 @@ jobs:
       - name: Publish
         run: dotnet publish --configuration Release --no-build -o ./publish
 
-      - name: Upload artifact for deploy
+      - name: List publish folder (for debugging)
+        run: ls -la ./publish
+
+      - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: dotnet-publish
           path: ./publish
 
   deploy:
-    runs-on: ubuntu-latest
     needs: build
+    runs-on: ubuntu-latest
     permissions:
       id-token: write
       contents: read
@@ -49,6 +52,9 @@ jobs:
           name: dotnet-publish
           path: ./publish
 
+      - name: Verify publish folder on deploy runner (debug)
+        run: ls -la ./publish
+
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -57,5 +63,5 @@ jobs:
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'KVRPortfolio'      # EXACT app service name
-          package: './publish'         # published artifact
+          app-name: 'KVRPortfolio'
+          package: './publish'
